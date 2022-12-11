@@ -1,10 +1,8 @@
 import mahotas as mh
-import seaborn as sns
 from matplotlib import pyplot as plt
 from glob import glob
 import os
 import numpy as np
-import pandas as pd
 import pickle
 
 from sklearn.pipeline import Pipeline

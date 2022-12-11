@@ -1,13 +1,13 @@
+import mahotas as mh
 import streamlit as st
-import pandas as pd
 import numpy as np
 import pickle
 from io import BytesIO, StringIO
 
 st.title('Final Project AB - Kelompok 9')
 
-# filename = 'finalized_model.sav'
-# loaded_model = pickle.load(open(filename, 'rb'))
+filename = 'finalized_model.sav'
+loaded_model = pickle.load(open(filename, 'rb'))
 
 STYLE = """
 <style>
@@ -38,10 +38,24 @@ class FileUpload(object):
             return
         content = file.getvalue()
         if isinstance(file, BytesIO):
+            IMM_SIZE = 224
             show_file.image(file)
-        else:
-            data = pd.read_csv(file)
-            st.dataframe(data.head(10))
+            image = mh.imread(file)
+            if len(image.shape) > 2:
+                # resize of RGB and png images
+                image = mh.resize_to(
+                    image, [IMM_SIZE, IMM_SIZE, image.shape[2]])
+            else:
+                # resize of grey images
+                image = mh.resize_to(image, [IMM_SIZE, IMM_SIZE])
+            if len(image.shape) > 2:
+                # change of colormap of images alpha chanel delete
+                image = mh.colors.rgb2grey(image[:, :, :3], dtype=np.uint8)
+
+            inputs = [mh.features.haralick(image).ravel()]
+            prediction = loaded_model.predict(inputs)
+            print("final pred", np.squeeze(prediction, -1))
+
         file.close()
 
 
