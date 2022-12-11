@@ -1,39 +1,50 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import pickle
+from io import BytesIO, StringIO
 
-st.title('Uber pickups in NYC')
+st.title('Final Project AB - Kelompok 9')
 
-DATE_COLUMN = 'date/time'
-DATA_URL = ('https://s3-us-west-2.amazonaws.com/'
-            'streamlit-demo-data/uber-raw-data-sep14.csv.gz')
+# filename = 'finalized_model.sav'
+# loaded_model = pickle.load(open(filename, 'rb'))
 
-
-@st.cache
-def load_data(nrows):
-    data = pd.read_csv(DATA_URL, nrows=nrows)
-    def lowercase(x): return str(x).lower()
-    data.rename(lowercase, axis='columns', inplace=True)
-    data[DATE_COLUMN] = pd.to_datetime(data[DATE_COLUMN])
-    return data
+STYLE = """
+<style>
+img {
+    max-width: 100%;
+}
+</style>
+"""
 
 
-data_load_state = st.text('Loading data...')
-data = load_data(10000)
-data_load_state.text("Done! (using st.cache)")
+class FileUpload(object):
 
-if st.checkbox('Show raw data'):
-    st.subheader('Raw data')
-    st.write(data)
+    def __init__(self):
+        self.fileTypes = ["png", "jpg"]
 
-st.subheader('Number of pickups by hour')
-hist_values = np.histogram(
-    data[DATE_COLUMN].dt.hour, bins=24, range=(0, 24))[0]
-st.bar_chart(hist_values)
+    def run(self):
+        """
+        Upload File on Streamlit Code
+        :return:
+        """
+        st.info(__doc__)
+        st.markdown(STYLE, unsafe_allow_html=True)
+        file = st.file_uploader("Upload file", type=self.fileTypes)
+        show_file = st.empty()
+        if not file:
+            show_file.info("Please upload a file of type: " +
+                           ", ".join(["png", "jpg"]))
+            return
+        content = file.getvalue()
+        if isinstance(file, BytesIO):
+            show_file.image(file)
+        else:
+            data = pd.read_csv(file)
+            st.dataframe(data.head(10))
+        file.close()
 
-# Some number in the range 0-23
-hour_to_filter = st.slider('hour', 0, 23, 17)
-filtered_data = data[data[DATE_COLUMN].dt.hour == hour_to_filter]
 
-st.subheader('Map of all pickups at %s:00' % hour_to_filter)
-st.map(filtered_data)
+if __name__ == "__main__":
+    helper = FileUpload()
+    helper.run()
