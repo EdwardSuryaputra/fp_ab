@@ -2,7 +2,7 @@ import mahotas as mh
 import streamlit as st
 import numpy as np
 import pickle
-from io import BytesIO, StringIO
+from io import BytesIO
 
 st.title('Final Project AB - Kelompok 9')
 
@@ -28,9 +28,9 @@ class FileUpload(object):
         Upload File on Streamlit Code
         :return:
         """
-        st.info(__doc__)
         st.markdown(STYLE, unsafe_allow_html=True)
-        file = st.file_uploader("Upload file", type=self.fileTypes)
+        file = st.file_uploader(
+            "Upload your chest x-ray image:", type=self.fileTypes)
         show_file = st.empty()
         if not file:
             show_file.info("Please upload a file of type: " +
@@ -54,7 +54,7 @@ class FileUpload(object):
 
             inputs = [mh.features.haralick(image).ravel()]
             prediction = loaded_model.predict(inputs)
-            print("final pred", np.squeeze(prediction, -1))
+            st.write(f"Prediction: {np.squeeze(prediction, -1)}")
 
         file.close()
 
