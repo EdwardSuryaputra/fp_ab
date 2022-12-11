@@ -21,20 +21,21 @@ img {
 class FileUpload(object):
 
     def __init__(self):
-        self.fileTypes = ["png", "jpg"]
+        self.fileTypes = ["png", "jpg", "jpeg"]
 
     def run(self):
         """
         Upload File on Streamlit Code
         :return:
         """
+        st.subheader("Predict using Logistic Regression!!")
         st.markdown(STYLE, unsafe_allow_html=True)
         file = st.file_uploader(
             "Upload your chest x-ray image:", type=self.fileTypes)
         show_file = st.empty()
         if not file:
             show_file.info("Please upload a file of type: " +
-                           ", ".join(["png", "jpg"]))
+                           ", ".join(["png", "jpg", "jpeg"]))
             return
         content = file.getvalue()
         if isinstance(file, BytesIO):
@@ -54,7 +55,7 @@ class FileUpload(object):
 
             inputs = [mh.features.haralick(image).ravel()]
             prediction = loaded_model.predict(inputs)
-            st.write(f"Prediction: {np.squeeze(prediction, -1)}")
+            st.code(f"Prediction: {np.squeeze(prediction, -1)}")
 
         file.close()
 
